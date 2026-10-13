@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".seeker.AddJob.SelectJobActivity">
+
+    <ImageView
+        android:id="@+id/img_fh_se"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_gravity="left"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="25dp"
+        app:srcCompat="@drawable/fanjhui" />
+
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginRight="25dp"
+        android:text="期望职位是"
+        android:textColor="#000000"
+        android:textSize="28sp" />
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginRight="25dp"
+        app:title="职位搜索">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView_zw_se"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:iconifiedByDefault="false"
+            app:queryHint="搜索职位名称" />
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_se"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginRight="25dp" />
+
+    <Button
+        android:id="@+id/btn_save_se"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:background="@drawable/btn_style_one"
+        android:text="保存"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp" />
+</LinearLayout>

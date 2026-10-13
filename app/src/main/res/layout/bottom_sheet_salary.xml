@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- 顶部按钮区 -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btnCancel"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="取消"
+            android:textColor="#666" />
+
+        <!-- 标题 -->
+        <TextView
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="fill"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="薪资要求（月薪，单位：千元）"
+            android:textAlignment="center"
+            android:textColor="#333"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnConfirm"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="确定"
+            android:textColor="#A4EBE5" />
+    </LinearLayout>
+
+    <!-- 两列滚动容器 -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="240dp"
+        android:layout_marginTop="12dp">
+
+        <!-- 左列：1K ~ 130K -->
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingEnd="4dp">
+
+            <LinearLayout
+                android:id="@+id/llSalaryLeft"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"/>
+        </ScrollView>
+
+        <!-- 右列：131K ~ 260K -->
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingStart="4dp">
+
+            <LinearLayout
+                android:id="@+id/llSalaryRight"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"/>
+        </ScrollView>
+    </LinearLayout>
+</LinearLayout>
