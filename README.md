@@ -15,7 +15,7 @@
 
 ### 后端（Spring Boot）
 - **框架**：Spring Boot + Spring Security + Spring Data JPA
-- **数据库**：MySQL
+- **数据库**：MySQL 8.0
 - **智能推荐**：协同过滤算法（基于用户 + 基于物品）
   - 改进皮尔逊相似度计算，加入用户行为与兴趣权重
     - Jaccard相似度计算岗位匹配
@@ -55,20 +55,22 @@
     │       ├── seeker/         # 求职者端模块
     │       └── view/          # 登录/注册/欢迎页
     ├── backend/                # Spring Boot后端
-    │   └── src/main/java/com/example/demo/
-    │       ├── controller/     # 接口控制层
-    │       ├── service/        # 业务逻辑层
-    │       ├── repository/      # 数据访问层
-    │       ├── model/          # 实体类
-    │       └── config/         # 配置类
+    │   ├── src/main/java/com/example/demo/
+    │   │   ├── controller/     # 接口控制层
+    │   │   ├── service/        # 业务逻辑层
+    │   │   ├── repository/      # 数据访问层
+    │   │   ├── model/          # 实体类
+    │   │   └── config/         # 配置类
+    │   └── campus recruitment.sql  # 数据库脚本文件
     ├── gradle/                 # Gradle构建配置
     └── README.md
     ```
 
     ## 🚀 运行方式
     1. 克隆项目到本地
-    2. **后端**：启动MySQL数据库，导入数据表，运行Spring Boot主类
-    3. **Android端**：使用Android Studio打开项目，修改接口地址后运行
+    2. **数据库**：创建MySQL数据库，导入 `backend/campus recruitment.sql` 脚本
+    3. **后端**：修改数据库配置，运行Spring Boot主类启动服务
+    4. **Android端**：使用Android Studio打开项目，修改接口地址后运行
 
     ## 📝 备注
     本项目为毕业设计作品，完整实现了前后端分离的校园招聘系统，包含智能推荐算法与数据可视化分析。
