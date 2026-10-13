@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 选中态 -->
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#E3F2FD" />
+            <corners android:radius="8dp" />
+            <stroke android:width="2dp" android:color="#1976D2" />
+        </shape>
+    </item>
+
+    <!-- 默认态：透明背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <!-- 透明或白色 -->
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="8dp" />
+            <!-- 可选：去掉描边 -->
+            <!-- <stroke android:width="0dp" android:color="@android:color/transparent" /> -->
+        </shape>
+    </item>
+</selector>

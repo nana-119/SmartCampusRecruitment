@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+
+    <application
+        android:name=".Tool.MyApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="校园智能招聘系统"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SmartCampusRecruitment"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+        <activity
+            android:name=".seeker.gongneng.chengjiActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SmartCampusRecruitment" />
+        <activity
+            android:name=".seeker.gongneng.shezhiActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.ApplyJobActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.ChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.JobDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.SearchJobActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.AddJob.SelectCityActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.AddJob.SelectJobActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.AddJob.UpdateJobActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.AddJob.InsertJobActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.AddJob.addJobActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.sousuoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.MeActivity"
+            android:exported="false">
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+        </activity>
+        <activity
+            android:name=".seeker.xiaoxiActivity"
+            android:exported="false">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
+        </activity>
+        <activity
+            android:name=".seeker.ToudiActivity"
+            android:exported="false" />
+        <activity
+            android:name=".seeker.SeekerMainActivity"
+            android:exported="false">
+
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            -->
+        </activity>
+        <activity
+            android:name=".recruiter.RecruiterMainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.WelcomeActivity"
+            android:exported="true">
+
+             <intent-filter>
+             <action android:name="android.intent.action.MAIN" />
+
+
+             <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
+        </activity>
+        <activity
+            android:name=".view.MainActivity"
+            android:exported="false">
+
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            -->
+        </activity>
+    </application>
+
+</manifest>
