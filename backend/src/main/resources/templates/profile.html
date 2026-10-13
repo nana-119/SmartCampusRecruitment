@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>个人中心 - 管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<section th:fragment="section">
+    <h2>个人中心</h2>
+    <p style="margin: 15px 0;">管理您的个人信息和账号设置。</p>
+
+    <!-- 个人信息区域 -->
+    <div style="margin-top: 20px; max-width: 600px;">
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+            <h3>基本信息</h3>
+            <p style="margin: 10px 0;"><strong>用户名：</strong><span th:text="${admin.username ?: 'Admin'}"></span></p>
+            <p style="margin: 10px 0;"><strong>角色：</strong>管理员</p>
+        </div>
+
+        <div>
+            <h3>修改密码</h3>
+            <form id="passwordForm" style="margin-top: 15px;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px;">原密码</label>
+                    <div style="position: relative;">
+                        <input type="password" id="oldPassword" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('oldPassword')">
+                            <i class="fas fa-eye" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                        </span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px;">新密码</label>
+                    <div style="position: relative;">
+                        <input type="password" id="newPassword" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('newPassword')">
+                            <i class="fas fa-eye" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                        </span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px;">确认新密码</label>
+                    <div style="position: relative;">
+                        <input type="password" id="confirmPassword" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('confirmPassword')">
+                            <i class="fas fa-eye" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                        </span>
+                    </div>
+                    <div id="passwordMatchMessage" style="margin-top: 5px; font-size: 14px;"></div>
+                    <div id="passwordStrengthMessage" style="margin-top: 5px; font-size: 14px;"></div>
+                </div>
+                <button type="submit" id="submitBtn" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    保存修改
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>    // 获取表单元素
+    const passwordForm = document.getElementById('passwordForm');
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const passwordMatchMessage = document.getElementById('passwordMatchMessage');
+    const passwordStrengthMessage = document.getElementById('passwordStrengthMessage');
+
+    // 密码正则表达式：必须包含大小写字母和数字，长度为6-12位
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/;
+
+    // 实时检查密码是否匹配
+    function checkPasswordMatch() {
+        const newPasswordValue = newPassword.value;
+        const confirmPasswordValue = confirmPassword.value;
+
+        if (newPasswordValue === '' && confirmPasswordValue === '') {
+            passwordMatchMessage.textContent = '';
+            passwordMatchMessage.style.color = '';
+            return true;
+        }
+
+        if (newPasswordValue === confirmPasswordValue) {
+            passwordMatchMessage.textContent = '密码匹配';
+            passwordMatchMessage.style.color = 'green';
+            return true;
+        } else {
+            passwordMatchMessage.textContent = '密码不匹配';
+            passwordMatchMessage.style.color = 'red';
+            return false;
+        }
+    }
+
+    // 检查密码强度
+    function checkPasswordStrength(password) {
+        if (password === '') {
+            passwordStrengthMessage.textContent = '';
+            passwordStrengthMessage.style.color = '';
+            return false;
+        }
+
+        if (passwordRegex.test(password)) {
+            passwordStrengthMessage.textContent = '密码格式正确';
+            passwordStrengthMessage.style.color = 'green';
+            return true;
+        } else {
+            passwordStrengthMessage.textContent = '密码必须包含大小写字母和数字，长度为6-12位';
+            passwordStrengthMessage.style.color = 'red';
+            return false;
+        }
+    }
+
+    function togglePasswordVisibility(inputId) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+        } else {
+            input.type = 'password';
+        }
+    }
+
+    // 为密码输入框添加事件监听器
+    newPassword.addEventListener('input', () => {
+        checkPasswordMatch();
+        checkPasswordStrength(newPassword.value);
+    });
+    confirmPassword.addEventListener('input', checkPasswordMatch);
+
+    // 表单提交事件处理
+    passwordForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // 阻止默认提交行为
+
+        const oldPassword = document.getElementById('oldPassword').value;
+        const newPasswordValue = newPassword.value;
+        const confirmPasswordValue = confirmPassword.value;
+
+        // 检查必填字段
+        if (!oldPassword || !newPasswordValue || !confirmPasswordValue) {
+            alert('请填写所有密码字段');
+            return;
+        }
+
+        // 检查密码是否匹配
+        if (!checkPasswordMatch()) {
+            alert('新密码和确认密码不匹配，请重新输入');
+            return;
+        }
+
+        // 检查密码强度
+        if (!checkPasswordStrength(newPasswordValue)) {
+            alert('新密码格式不符合要求，请重新输入');
+            return;
+        }
+
+        // 发送AJAX请求到后端
+        const formData = new FormData();
+        formData.append('oldPassword', oldPassword);
+        formData.append('newPassword', newPasswordValue);
+        formData.append('confirmNewPassword', confirmPasswordValue);
+
+        fetch('/profile/changePassword', {
+            method: 'POST',
+            body: new URLSearchParams({
+                oldPassword: oldPassword,
+                newPassword: newPasswordValue,
+                confirmNewPassword: confirmPasswordValue
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                if (data === "密码修改成功") {
+                    passwordForm.reset();
+                    passwordMatchMessage.textContent = '';
+                    passwordStrengthMessage.textContent = '';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('密码修改失败');
+            });
+    });
+
+    </script>
+</section>
+</body>
+</html>

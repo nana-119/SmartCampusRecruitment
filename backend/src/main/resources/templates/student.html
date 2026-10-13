@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>学生管理 - 管理系统</title>
+</head>
+<body>
+<section th:fragment="section">
+    <h2>学生管理</h2>
+    <p style="margin: 15px 0;">在此页面可以查看、添加、编辑和删除学生信息。</p>
+
+    <!-- 筛选和操作区域 -->
+    <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <!-- 学号筛选功能 -->
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="text"
+                   id="studentIdFilter"
+                   name="studentId"
+                   placeholder="请输入学号关键词"
+                   th:value="${param.studentId ?: ''}"
+                   style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
+            <button onclick="filterByStudentId()"
+                    style="padding: 8px 15px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-search"></i> 筛选
+            </button>
+            <button onclick="clearFilter()"
+                    style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-times"></i> 清除
+            </button>
+        </div>
+
+        <!-- 添加学生按钮 -->
+        <button onclick="openAddStudentDialog()" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            <i class="fas fa-plus"></i> 添加学生
+        </button>
+    </div>
+
+    <!-- 添加学生对话框 -->
+    <div id="addStudentDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 style="margin-top: 0;">添加学生</h3>
+            <form id="addStudentForm">
+                <div style="margin-bottom: 15px;">
+                    <label for="studentId" style="display: block; margin-bottom: 5px;">学号:</label>
+                    <input type="text" id="studentId" name="studentId" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="name" style="display: block; margin-bottom: 5px;">姓名:</label>
+                    <input type="text" id="name" name="name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="gender" style="display: block; margin-bottom: 5px;">性别:</label>
+                    <select id="gender" name="gender" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="birthDate" style="display: block; margin-bottom: 5px;">出生年月:</label>
+                    <input type="date" id="birthDate" name="birthDate" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="phone" style="display: block; margin-bottom: 5px;">联系电话:</label>
+                    <input type="text" id="phone" name="phone" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeAddStudentDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                    <button type="submit" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">确定</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 在添加学生对话框后面添加编辑学生对话框 -->
+    <div id="editStudentDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 style="margin-top: 0;">编辑学生</h3>
+            <form id="editStudentForm">
+                <input type="hidden" id="originalPhone" name="originalPhone">
+                <div style="margin-bottom: 15px;">
+                    <label for="editStudentId" style="display: block; margin-bottom: 5px;">学号:</label>
+                    <input type="text" id="editStudentId" name="studentId" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" readonly>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="editName" style="display: block; margin-bottom: 5px;">姓名:</label>
+                    <input type="text" id="editName" name="name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="editGender" style="display: block; margin-bottom: 5px;">性别:</label>
+                    <select id="editGender" name="gender" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="editBirthDate" style="display: block; margin-bottom: 5px;">出生年月:</label>
+                    <input type="date" id="editBirthDate" name="birthDate" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="editPhone" style="display: block; margin-bottom: 5px;">联系电话:</label>
+                    <input type="text" id="editPhone" name="phone" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="editPassword" style="display: block; margin-bottom: 5px;">登录密码:</label>
+                    <input type="text" id="editPassword" name="password" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeEditStudentDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                    <button type="submit" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 删除确认对话框 -->
+    <div id="deleteConfirmDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 style="margin-top: 0;">确认删除</h3>
+            <p>确定要删除该学生数据吗？</p>
+            <input type="hidden" id="deleteStudentId">
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeDeleteConfirmDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                <button type="button" onclick="confirmDeleteStudent()" style="padding: 8px 15px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>        // 定义筛选函数（在全局作用域）
+    function filterByStudentId() {
+        const studentId = document.getElementById('studentIdFilter').value.trim();
+        const baseUrl = window.location.pathname;
+
+        if (studentId) {
+            window.location.href = `${baseUrl}?studentId=${encodeURIComponent(studentId)}`;
+        } else {
+            // 如果学号为空，也执行跳转以确保显示所有数据
+            window.location.href = baseUrl;
+        }
+    }
+
+    // 定义清除筛选函数（在全局作用域）
+    function clearFilter() {
+        document.getElementById('studentIdFilter').value = '';
+        window.location.href = window.location.pathname;
+    }
+
+    function openAddStudentDialog() {
+        document.getElementById('addStudentDialog').style.display = 'block';
+        document.getElementById('addStudentForm').reset();
+    }
+
+    // 关闭添加学生对话框
+    function closeAddStudentDialog() {
+        document.getElementById('addStudentDialog').style.display = 'none';
+    }
+
+    function openEditStudentDialog(studentId) {
+        // 发送 AJAX 请求获取学生详细信息
+        fetch(`/seekerList/get?studentId=${encodeURIComponent(studentId)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(student => {
+                // 填充表单数据
+                document.getElementById('originalPhone').value = student.phone; // 保存原始手机号
+                document.getElementById('editStudentId').value = student.studentId; // 修复字段名
+                document.getElementById('editName').value = student.name;
+                document.getElementById('editGender').value = student.gender;
+                document.getElementById('editBirthDate').value = student.birthDate ? student.birthDate.substring(0, 10) : '';
+                document.getElementById('editPhone').value = student.phone; // 当前手机号
+                document.getElementById('editPassword').value = student.password;
+
+                // 显示对话框
+                document.getElementById('editStudentDialog').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('获取学生信息失败');
+            });
+    }
+
+    // 关闭编辑学生对话框
+    function closeEditStudentDialog() {
+        document.getElementById('editStudentDialog').style.display = 'none';
+    }
+
+    // 打开删除确认对话框
+    function openDeleteConfirmDialog(phone) {
+        // 添加参数验证
+        if (!phone || phone === 'null' || phone.trim() === '') {
+            alert('无效的手机号');
+            return;
+        }
+
+        document.getElementById('deleteStudentId').value = phone; // 修复ID名称
+        document.getElementById('deleteConfirmDialog').style.display = 'block';
+    }
+
+
+    // 关闭删除确认对话框
+    function closeDeleteConfirmDialog() {
+        document.getElementById('deleteConfirmDialog').style.display = 'none';
+    }
+
+    // 确认删除学生
+    function confirmDeleteStudent() {
+        const phone = document.getElementById('deleteStudentId').value; // 修复ID名称
+        if (!phone) {
+            alert('无效的手机号');
+            return;
+        }
+        // 发送删除请求
+        fetch(`/seekerList/delete?phone=${encodeURIComponent(phone)}`, {
+            method: 'POST'
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('学生删除成功');
+                    closeDeleteConfirmDialog();
+                    location.reload(); // 刷新页面
+                } else {
+                    alert('删除失败');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('删除失败');
+            });
+    }
+
+
+    // 页面加载完成后绑定事件
+    document.addEventListener('DOMContentLoaded', function() {
+        // 绑定按钮事件
+        const filterBtn = document.getElementById('filterBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        if (filterBtn) {
+            filterBtn.addEventListener('click', filterByStudentId);
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', clearFilter);
+        }
+
+        // 绑定回车键事件
+        const input = document.getElementById('studentIdFilter');
+        if (input) {
+            input.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    filterByStudentId();
+                }
+            });
+        }
+
+        const addStudentForm = document.getElementById('addStudentForm');
+        if (addStudentForm) {
+            addStudentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // 获取表单数据
+                const formData = new FormData(addStudentForm);
+                const studentData = {
+                    studentId: formData.get('studentId'),
+                    name: formData.get('name'),
+                    gender: formData.get('gender'),
+                    birthDate: formData.get('birthDate'),
+                    phone: formData.get('phone')
+                };
+
+                // 发送 AJAX 请求
+                fetch('/seekerList/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(studentData)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('学生添加成功');
+                            closeAddStudentDialog();
+                            location.reload(); // 刷新页面以显示新数据
+                        } else {
+                            alert('添加失败，请重试');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('添加失败，请重试');
+                    });
+            });
+        }
+        const editStudentForm = document.getElementById('editStudentForm');
+        if (editStudentForm) {
+            editStudentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // 获取表单数据
+                const formData = new FormData(editStudentForm);
+                const studentData = {
+                    originalPhone: formData.get('originalPhone'), // 原始手机号
+                    studentId: formData.get('studentId'),
+                    name: formData.get('name'),
+                    gender: formData.get('gender'),
+                    birthDate: formData.get('birthDate'),
+                    phone: formData.get('phone'), // 新手机号
+                    password: formData.get('password')
+                };
+
+                // 验证手机号是否为空
+                if (!studentData.phone || studentData.phone.trim() === '') {
+                    alert('手机号不能为空');
+                    return;
+                }
+
+                // 发送更新请求
+                fetch('/seekerList/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(studentData)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('学生信息更新成功');
+                            closeEditStudentDialog();
+                            location.reload(); // 刷新页面
+                        } else {
+                            return response.text().then(text => {
+                                alert('更新失败: ' + text);
+                                throw new Error(text);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('更新失败');
+                    });
+            });
+        }
+    });
+    </script>
+
+    <!-- 学生列表区域 -->
+    <div style="margin-top: 20px; border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background-color: #f8f9fa;">
+            <tr>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">学号</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">姓名</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">性别</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">出生年月</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">联系电话</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="student : ${seekerList}">
+                <td style="padding: 12px; border-bottom: 1px solid #eee;" th:text="${student.studentId}"></td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;" th:text="${student.name}"></td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;" th:text="${student.gender}"></td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;" th:text="${#dates.format(student.birthDate, 'yyyy-MM-dd')}"></td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;" th:text="${student.phone}"></td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                    <a href="javascript:void(0)"
+                       th:data-student-id="${student.studentId}"
+                       onclick="openEditStudentDialog(this.getAttribute('data-student-id'))"
+                       style="color: #3498db; margin-right: 10px;">
+                        <i class="fas fa-edit"></i> 编辑
+                    </a>
+                    <a href="javascript:void(0)"
+                       th:data-phone="${student.phone}"
+                       onclick="openDeleteConfirmDialog(this.getAttribute('data-phone'))"       style="color: #e74c3c;">
+                        <i class="fas fa-trash"></i> 删除
+                    </a>
+                </td>
+            </tr>
+
+            <!-- 当没有学生数据时显示 -->
+            <tr th:if="${seekerList.isEmpty()}">
+                <td colspan="6" style="padding: 20px; text-align: center; color: #777;">
+                    暂无学生数据
+                </td>
+            </tr>
+        </table>
+    </div>
+</section>
+</body>
+</html>

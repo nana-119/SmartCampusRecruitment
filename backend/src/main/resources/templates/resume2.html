@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>商务简历</title>
+    <style>
+        /* 基础样式重置，确保IText正确解析 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 页面设置 - 与ITextRenderer配置匹配 */
+        @page {
+            size: A4 portrait;
+            margin: 15mm;
+        }
+
+        body {
+            font-family: "SimSun", "Helvetica Neue", Arial, sans-serif; /* 优先使用宋体确保中文显示 */
+            color: #222222;
+            line-height: 1.6;
+        }
+
+        /* 头部样式 - 使用表格替代flex布局以兼容IText */
+        table.header {
+            width: 100%;
+            background: #f7f7f7;
+            border-collapse: collapse;
+            padding: 30px;
+            margin-bottom: 10px;
+        }
+
+        .avatar-cell {
+            width: 150px;
+            padding: 30px;
+            vertical-align: middle;
+        }
+
+        .info-cell {
+            padding: 30px 30px 30px 0;
+            vertical-align: middle;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: block; /* 确保图片正确显示 */
+            border: 2px solid #dddddd;
+        }
+
+        .info h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            color: #111111;
+        }
+
+        .info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        /* 区块样式 */
+        .section {
+            padding: 20px 30px;
+            page-break-inside: avoid; /* 防止区块被分页截断 */
+        }
+
+        .section h2 {
+            border-left: 4px solid #0066cc;
+            padding-left: 8px;
+            margin: 15px 0 10px 0;
+            font-size: 18px;
+            color: #0066cc;
+        }
+
+        /* 列表样式 - 确保IText正确渲染列表符号 */
+        ul {
+            list-style-position: inside; /* 列表符号在内容区内 */
+            margin-left: 10px;
+        }
+
+        li {
+            margin: 12px 0;
+            padding-left: 5px;
+        }
+
+        /* 工作经历样式优化 */
+        .experience-item strong {
+            color: #111111;
+            font-size: 15px;
+        }
+
+        .experience-date {
+            color: #666666;
+            margin: 3px 0;
+            display: block;
+        }
+
+        .experience-desc {
+            margin-top: 5px;
+            text-align: justify;
+        }
+
+        /* 确保图片在PDF中正确渲染 */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<!-- 使用表格替代flex布局，确保IText正确解析 -->
+<table class="header">
+    <tr>
+        <td class="avatar-cell">
+            <img th:src="'data:image/png;base64,' + ${avatar}" class="avatar" alt="个人头像"/>
+        </td>
+        <td class="info-cell">
+            <div class="info">
+                <h1 th:text="${name}"></h1>
+                <p th:text="'Email: ' + ${email} + ' | Tel: ' + ${phone}"></p>
+                <p th:text="'Skills: ' + ${skills}"></p>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div class="section">
+    <h2>Education</h2>
+    <ul>
+        <li th:each="e : ${educations}" th:text="|${e.school} — ${e.major} (${e.startDate} — ${e.endDate})|">
+        </li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>Experience</h2>
+    <ul>
+        <li class="experience-item" th:each="w : ${experiences}">
+            <strong th:text="${w.company} +'-'+ ${w.position}">ABC公司 - 市场经理</strong>
+            <span class="experience-date" th:text="'(' + ${w.startDate} + ' - ' + ${w.endDate} + ')'"></span>
+            <span class="experience-desc" th:text="${w.description}"></span>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

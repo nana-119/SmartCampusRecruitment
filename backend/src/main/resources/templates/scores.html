@@ -1,0 +1,752 @@
+<!-- #file:E:\毕设-智能校招系统APP\demo\src\main\resources\templates\scores.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>成绩管理 - 管理系统</title>
+    <style>
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #ccc;
+        }
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+<section th:fragment="section">
+    <h2>成绩管理</h2>
+    <p style="margin: 15px 0;">录入和管理学生的各项成绩信息。</p>
+
+    <!-- 筛选区域 -->
+    <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="text" id="studentNumberFilter" placeholder="学号" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 150px;">
+            <input type="text" id="subjectNameFilter" placeholder="课程名" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 150px;">
+            <button onclick="filterAcademicRecords()" style="padding: 8px 15px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-search"></i> 筛选
+            </button>
+            <button onclick="clearFilters()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-times"></i> 清除
+            </button>
+        </div>
+
+        <div>
+            <button onclick="openAddRecordDialog()" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                <i class="fas fa-plus"></i> 添加成绩
+            </button>
+            <button onclick="openImportDialog()" style="padding: 8px 15px; background-color: #9b59b6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-upload"></i> 批量导入
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab选项卡 -->
+    <div class="tab" style="margin-top: 20px;">
+        <button class="tablinks active" onclick="openTab(event, 'mainRecords')">学生成绩表</button>
+        <button class="tablinks" onclick="openTab(event, 'tempRecords')">临时成绩表</button>
+    </div>
+
+    <!-- 主成绩表 -->
+    <div id="mainRecords" class="tabcontent" style="display: block;">
+        <div style="margin-top: 20px; border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background-color: #f8f9fa;">
+                <tr>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">学号</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">课程名</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">学年</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">学期</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">成绩</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">学分</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">操作</th>
+                </tr>
+                </thead>
+                <tbody id="mainRecordsTable">
+                <!-- 数据将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 临时成绩表 -->
+    <div id="tempRecords" class="tabcontent" style="display: none;">
+        <div style="margin-top: 20px; border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background-color: #f8f9fa;">
+                <tr>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">学号</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">课程名</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">学年</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">学期</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">成绩</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">学分</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">操作</th>
+                </tr>
+                </thead>
+                <tbody id="tempRecordsTable">
+                <!-- 数据将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <button onclick="migrateTempRecords()" style="padding: 10px 20px; background-color: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                迁移选中记录到正式表
+            </button>
+        </div>
+    </div>
+
+    <!-- 添加成绩对话框 -->
+    <div id="addRecordDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 style="margin-top: 0;">添加成绩记录</h3>
+            <form id="addRecordForm">
+                <div style="margin-bottom: 15px;">
+                    <label for="studentNumber" style="display: block; margin-bottom: 5px;">学号:</label>
+                    <input type="text" id="studentNumber" name="studentNumber" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <div id="studentValidationMsg" style="color: red; font-size: 12px; margin-top: 5px;"></div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="subjectName" style="display: block; margin-bottom: 5px;">课程名:</label>
+                    <input type="text" id="subjectName" name="subjectName" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="academicYear" style="display: block; margin-bottom: 5px;">学年:</label>
+                    <input type="text" id="academicYear" name="academicYear" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="semester" style="display: block; margin-bottom: 5px;">学期:</label>
+                    <select id="semester" name="semester" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="第一学期">第一学期</option>
+                        <option value="第二学期">第二学期</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="score" style="display: block; margin-bottom: 5px;">成绩:</label>
+                    <input type="number" id="score" name="score" step="0.01" min="0" max="100" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="credit" style="display: block; margin-bottom: 5px;">学分:</label>
+                    <input type="number" id="credit" name="credit" step="0.1" min="0" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeAddRecordDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                    <button type="submit" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">确定</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑成绩对话框 -->
+    <div id="editRecordDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 style="margin-top: 0;">编辑成绩记录</h3>
+            <form id="editRecordForm">
+                <input type="hidden" id="editStudentNumber">
+                <input type="hidden" id="editSubjectName">
+                <input type="hidden" id="editAcademicYear">
+                <input type="hidden" id="editSemester">
+
+                <div style="margin-bottom: 15px;">
+                    <label for="editSubjectNameDisplay" style="display: block; margin-bottom: 5px;">课程名:</label>
+                    <input type="text" id="editSubjectNameDisplay" readonly style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="editAcademicYearDisplay" style="display: block; margin-bottom: 5px;">学年:</label>
+                    <input type="text" id="editAcademicYearDisplay" readonly style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="editSemesterDisplay" style="display: block; margin-bottom: 5px;">学期:</label>
+                    <input type="text" id="editSemesterDisplay" readonly style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="editScore" style="display: block; margin-bottom: 5px;">成绩:</label>
+                    <input type="number" id="editScore" step="0.01" min="0" max="100" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="editCredit" style="display: block; margin-bottom: 5px;">学分:</label>
+                    <input type="number" id="editCredit" step="0.1" min="0" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeEditRecordDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                    <button type="submit" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 批量导入对话框 -->
+    <div id="importDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 500px;">
+            <h3 style="margin-top: 0;">批量导入成绩</h3>
+            <div style="margin-bottom: 15px;">
+                <p>请上传Excel文件（.xls或.xlsx），格式如下：</p>
+                <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px;">
+学号	        课程名	     学年	            学期	成绩 学分
+2021001	高等数学	2021-2022	第一学期	85.5	4.0
+2021002	大学英语	2021-2022	第二学期	78.0	3.0</pre>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <input type="file" id="excelFile" accept=".xls,.xlsx" style="width: 100%;">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeImportDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                <button type="button" onclick="importExcel()" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">导入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认对话框 -->
+    <div id="deleteConfirmDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 style="margin-top: 0;">确认删除</h3>
+            <p>确定要删除该成绩记录吗？</p>
+            <input type="hidden" id="deleteStudentNumber">
+            <input type="hidden" id="deleteSubjectName">
+            <input type="hidden" id="deleteAcademicYear">
+            <input type="hidden" id="deleteSemester">
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeDeleteConfirmDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                <button type="button" onclick="confirmDeleteRecord()" style="padding: 8px 15px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查是否有预加载的数据
+            const preloadedMainRecords = window.preloadedMainRecords || [];
+            const preloadedTempRecords = window.preloadedTempRecords || [];
+
+            if (preloadedMainRecords.length > 0) {
+                renderMainRecords(preloadedMainRecords);
+            } else {
+                loadMainRecords();
+            }
+
+            // 学号实时验证
+            document.getElementById('studentNumber').addEventListener('blur', function() {
+                validateStudentNumber(this.value);
+            });
+
+            // 添加成绩表单提交
+            document.getElementById('addRecordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addAcademicRecord();
+            });
+
+            // 编辑成绩表单提交
+            document.getElementById('editRecordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateAcademicRecord();
+            });
+        });
+
+        // Tab切换功能
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+
+            // 加载对应tab的数据 - 总是从服务器获取最新数据
+            if (tabName === 'tempRecords') {
+                loadTempRecords();
+            } else if (tabName === 'mainRecords') {
+                loadMainRecords();
+            }
+        }
+
+        // 加载主成绩表数据
+        function renderMainRecords(data) {
+            const tableBody = document.getElementById('mainRecordsTable');
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: #777;">暂无成绩数据</td></tr>';
+                return;
+            }
+
+            data.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.studentNumber}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.subjectName}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.academicYear}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.semester}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.score}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.credit}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                    <a href="javascript:void(0)"
+                       onclick="openEditRecordDialog('${record.studentNumber}', '${record.subjectName}', '${record.academicYear}', '${record.semester}')"
+                       style="color: #3498db; margin-right: 10px;">
+                        <i class="fas fa-edit"></i> 编辑
+                    </a>
+                    <a href="javascript:void(0)"
+                       onclick="openDeleteConfirmDialog('${record.studentNumber}', '${record.subjectName}', '${record.academicYear}', '${record.semester}')"
+                       style="color: #e74c3c;">
+                        <i class="fas fa-trash"></i> 删除
+                    </a>
+                </td>
+            `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 渲染临时成绩表数据
+        function renderTempRecords(data) {
+            const tableBody = document.getElementById('tempRecordsTable');
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: #777;">暂无临时成绩数据</td></tr>';
+                return;
+            }
+
+            data.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                    <input type="checkbox" class="tempRecordCheckbox"
+                           data-student-number="${record.studentNumber}"
+                           data-subject-name="${record.subjectName}"
+                           data-academic-year="${record.academicYear}"
+                           data-semester="${record.semester}"
+                           data-score="${record.score}"
+                           data-credit="${record.credit}">
+                    ${record.studentNumber}                </td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.subjectName}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.academicYear}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.semester}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.score}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${record.credit}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                    <a href="javascript:void(0)"
+                       onclick="deleteTempRecord('${record.studentNumber}', '${record.subjectName}', '${record.academicYear}', '${record.semester}')"
+                       style="color: #e74c3c;">
+                        <i class="fas fa-trash"></i> 删除
+                    </a>
+                </td>
+            `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 修改 loadMainRecords 函数，添加渲染调用
+        function loadMainRecords(filters = {}) {
+            let url = '/academicRecord/list?t=' + new Date().getTime();
+            const params = new URLSearchParams();
+
+            if (filters.studentNumber) {
+                params.append('studentNumber', filters.studentNumber);
+            }
+            if (filters.subjectName) {
+                params.append('subjectName', filters.subjectName);
+            }
+
+            if (params.toString()) {
+                url += '&' + params.toString();
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    renderMainRecords(data);
+                    // 更新缓存数据
+                    window.preloadedMainRecords = data;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('加载成绩数据失败');
+                });
+        }
+
+        // 修改 loadTempRecords 函数，添加渲染调用
+        function loadTempRecords() {
+            const url = '/tempAcademicRecord/list?t=' + new Date().getTime();
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    renderTempRecords(data);
+                    // 更新缓存数据
+                    window.preloadedTempRecords = data;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('加载临时成绩数据失败');
+                });
+        }
+
+        // 筛选成绩记录
+        function filterAcademicRecords() {
+            const studentNumber = document.getElementById('studentNumberFilter').value.trim();
+            const subjectName = document.getElementById('subjectNameFilter').value.trim();
+
+            const filters = {};
+            if (studentNumber) filters.studentNumber = studentNumber;
+            if (subjectName) filters.subjectName = subjectName;
+
+            loadMainRecords(filters);
+        }
+
+        // 清除筛选条件
+        function clearFilters() {
+            document.getElementById('studentNumberFilter').value = '';
+            document.getElementById('subjectNameFilter').value = '';
+            loadMainRecords();
+        }
+
+        // 打开添加成绩对话框
+        function openAddRecordDialog() {
+            document.getElementById('addRecordDialog').style.display = 'block';
+            document.getElementById('addRecordForm').reset();
+            document.getElementById('studentValidationMsg').textContent = '';
+        }
+
+        // 关闭添加成绩对话框
+        function closeAddRecordDialog() {
+            document.getElementById('addRecordDialog').style.display = 'none';
+        }
+
+        // 验证学号是否存在
+        function validateStudentNumber(studentNumber) {
+            if (!studentNumber) {
+                document.getElementById('studentValidationMsg').textContent = '';
+                return;
+            }
+
+            fetch(`/seekerList/exists?studentId=${encodeURIComponent(studentNumber)}`)
+                .then(response => response.json())
+                .then(exists => {
+                    if (exists) {
+                        document.getElementById('studentValidationMsg').innerHTML = '<span style="color: green;">学号有效</span>';
+                    } else {
+                        document.getElementById('studentValidationMsg').innerHTML = '<span style="color: red;">学号不存在</span>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('studentValidationMsg').innerHTML = '<span style="color: red;">验证失败</span>';
+                });
+        }
+
+        // 添加成绩记录
+        function addAcademicRecord() {
+            const form = document.getElementById('addRecordForm');
+            const formData = new FormData(form);
+
+            const recordData = {
+                studentNumber: formData.get('studentNumber'),
+                subjectName: formData.get('subjectName'),
+                academicYear: formData.get('academicYear'),
+                semester: formData.get('semester'),
+                score: parseFloat(formData.get('score')),
+                credit: parseFloat(formData.get('credit'))
+            };
+
+            // 验证学号是否存在
+            fetch(`/seekerList/exists?studentId=${encodeURIComponent(recordData.studentNumber)}`)
+                .then(response => response.json())
+                .then(exists => {
+                    if (!exists) {
+                        alert('学号不存在，请先添加学生信息');
+                        return;
+                    }
+
+                    // 提交成绩数据
+                    fetch('/academicRecord/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(recordData)
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('成绩添加成功');
+                                closeAddRecordDialog();
+                                loadMainRecords();
+                            } else {
+                                return response.text().then(text => {
+                                    throw new Error(text);
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('添加失败: ' + error.message);
+                        });
+                });
+        }
+
+        // 打开编辑成绩对话框
+        function openEditRecordDialog(studentNumber, subjectName, academicYear, semester) {
+            // 获取成绩记录详情
+            fetch(`/academicRecord/get?studentNumber=${encodeURIComponent(studentNumber)}&subjectName=${encodeURIComponent(subjectName)}&academicYear=${encodeURIComponent(academicYear)}&semester=${encodeURIComponent(semester)}`)
+                .then(response => response.json())
+                .then(record => {
+                    // 填充表单数据
+                    document.getElementById('editStudentNumber').value = record.studentNumber;
+                    document.getElementById('editSubjectName').value = record.subjectName;
+                    document.getElementById('editAcademicYear').value = record.academicYear;
+                    document.getElementById('editSemester').value = record.semester;
+
+                    document.getElementById('editSubjectNameDisplay').value = record.subjectName;
+                    document.getElementById('editAcademicYearDisplay').value = record.academicYear;
+                    document.getElementById('editSemesterDisplay').value = record.semester;
+
+                    document.getElementById('editScore').value = record.score;
+                    document.getElementById('editCredit').value = record.credit;
+
+                    // 显示对话框
+                    document.getElementById('editRecordDialog').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('获取成绩信息失败');
+                });
+        }
+
+        // 关闭编辑成绩对话框
+        function closeEditRecordDialog() {
+            document.getElementById('editRecordDialog').style.display = 'none';
+        }
+
+        // 更新成绩记录
+        function updateAcademicRecord() {
+            const studentNumber = document.getElementById('editStudentNumber').value;
+            const subjectName = document.getElementById('editSubjectName').value;
+            const academicYear = document.getElementById('editAcademicYear').value;
+            const semester = document.getElementById('editSemester').value;
+
+            const recordData = {
+                score: parseFloat(document.getElementById('editScore').value),
+                credit: parseFloat(document.getElementById('editCredit').value)
+            };
+
+            fetch(`/academicRecord/update?studentNumber=${encodeURIComponent(studentNumber)}&subjectName=${encodeURIComponent(subjectName)}&academicYear=${encodeURIComponent(academicYear)}&semester=${encodeURIComponent(semester)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(recordData)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('成绩更新成功');
+                        closeEditRecordDialog();
+                        loadMainRecords();
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error(text);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('更新失败: ' + error.message);
+                });
+        }
+
+        // 打开删除确认对话框
+        function openDeleteConfirmDialog(studentNumber, subjectName, academicYear, semester) {
+            document.getElementById('deleteStudentNumber').value = studentNumber;
+            document.getElementById('deleteSubjectName').value = subjectName;
+            document.getElementById('deleteAcademicYear').value = academicYear;
+            document.getElementById('deleteSemester').value = semester;
+            document.getElementById('deleteConfirmDialog').style.display = 'block';
+        }
+
+        // 关闭删除确认对话框
+        function closeDeleteConfirmDialog() {
+            document.getElementById('deleteConfirmDialog').style.display = 'none';
+        }
+
+        // 确认删除成绩记录
+        function confirmDeleteRecord() {
+            const studentNumber = document.getElementById('deleteStudentNumber').value;
+            const subjectName = document.getElementById('deleteSubjectName').value;
+            const academicYear = document.getElementById('deleteAcademicYear').value;
+            const semester = document.getElementById('deleteSemester').value;
+
+            fetch(`/academicRecord/delete?studentNumber=${encodeURIComponent(studentNumber)}&subjectName=${encodeURIComponent(subjectName)}&academicYear=${encodeURIComponent(academicYear)}&semester=${encodeURIComponent(semester)}`, {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('成绩删除成功');
+                        closeDeleteConfirmDialog();
+                        loadMainRecords();
+                    } else {
+                        alert('删除失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败');
+                });
+        }
+
+        // 打开导入对话框
+        function openImportDialog() {
+            document.getElementById('importDialog').style.display = 'block';
+            document.getElementById('excelFile').value = '';
+        }
+
+        // 关闭导入对话框
+        function closeImportDialog() {
+            document.getElementById('importDialog').style.display = 'none';
+        }
+
+        // 导入Excel文件
+        function importExcel() {
+            const fileInput = document.getElementById('excelFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('请选择Excel文件');
+                return;
+            }
+
+            // 检查文件类型
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx')) {
+                alert('请选择.xls或.xlsx格式的Excel文件');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // 上传Excel文件到服务器
+            fetch('/academicRecord/importExcel', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error(text);
+                        });
+                    }
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('数据导入临时表成功');
+                        closeImportDialog();
+                        // 切换到临时表tab
+                        document.querySelector('.tablinks:nth-child(2)').click();
+                    } else {
+                        alert('导入失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('导入失败: ' + error.message);
+                });
+        }
+
+        // 迁移选中的临时记录
+        function migrateTempRecords() {
+            const checkboxes = document.querySelectorAll('.tempRecordCheckbox:checked');
+            if (checkboxes.length === 0) {
+                alert('请先选择要迁移的记录');
+                return;
+            }
+
+            const records = [];
+            checkboxes.forEach(checkbox => {
+                records.push({
+                    studentNumber: checkbox.dataset.studentNumber,
+                    subjectName: checkbox.dataset.subjectName,
+                    academicYear: checkbox.dataset.academicYear,
+                    semester: checkbox.dataset.semester,
+                    score: parseFloat(checkbox.dataset.score),
+                    credit: parseFloat(checkbox.dataset.credit)
+                });
+            });
+
+            fetch('/academicRecord/migrate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(records)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('数据迁移成功');
+                        loadTempRecords();
+                        loadMainRecords();
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error(text);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('迁移失败: ' + error.message);
+                });
+        }
+
+        // 删除临时记录
+        function deleteTempRecord(studentNumber, subjectName, academicYear, semester) {
+            if (!confirm('确定要删除该临时记录吗？')) {
+                return;
+            }
+
+            fetch(`/tempAcademicRecord/delete?studentNumber=${encodeURIComponent(studentNumber)}&subjectName=${encodeURIComponent(subjectName)}&academicYear=${encodeURIComponent(academicYear)}&semester=${encodeURIComponent(semester)}`, {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('临时记录删除成功');
+                        loadTempRecords();
+                    } else {
+                        alert('删除失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败');
+                });
+        }
+    </script>
+    <script th:inline="javascript">    /*<![CDATA[*/
+    window.preloadedMainRecords = /*[[${mainRecords}]]*/ [];
+    window.preloadedTempRecords = /*[[${tempRecords}]]*/ [];
+    /*]]>*/
+    </script>
+</section>
+</body>
+</html>

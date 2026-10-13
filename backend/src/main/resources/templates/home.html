@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>首页 - 管理系统</title>
+</head>
+<body>
+<section th:fragment="section">
+    <h2>欢迎使用管理系统</h2>
+    <p style="margin-top: 20px;">这是系统的首页，您可以通过左侧菜单导航到不同的功能模块。</p>
+
+    <div style="margin-top: 30px;">
+        <h3>系统功能概览</h3>
+        <ul style="margin-top: 10px; line-height: 1.8;">
+            <li><strong>学生管理</strong>：管理学生基本信息、学籍状态等</li>
+            <li><strong>企业管理</strong>：维护合作企业信息、联系方式等</li>
+            <li><strong>岗位审核</strong>：审核企业发布的招聘岗位信息</li>
+            <li><strong>成绩录入</strong>：录入和管理学生相关成绩数据</li>
+            <li><strong>管理员管理</strong>：管理管理员基本信息</li>
+            <li><strong>个人中心</strong>：管理个人账号信息和密码</li>
+        </ul>
+    </div>
+</section>
+</body>
+</html>

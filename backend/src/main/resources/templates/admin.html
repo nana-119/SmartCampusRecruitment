@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>管理员管理 - 管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<section th:fragment="section">
+    <h2>管理员管理</h2>
+    <p style="margin: 15px 0;">在此页面可以查看、添加、编辑和删除管理员信息。</p>
+
+    <!-- 操作区域 -->
+    <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <!-- 添加管理员按钮 -->
+        <button onclick="openAddAdminDialog()" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            <i class="fas fa-plus"></i> 添加管理员
+        </button>
+    </div>
+
+    <!-- 添加管理员对话框 -->
+    <div id="addAdminDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 style="margin-top: 0;">添加管理员</h3>
+            <form id="addAdminForm">
+                <div style="margin-bottom: 15px;">
+                    <label for="username" style="display: block; margin-bottom: 5px;">用户名:</label>
+                    <input type="text" id="username" name="username" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px; position: relative;">
+                    <label for="password" style="display: block; margin-bottom: 5px;">密码:</label>
+                    <input type="password" id="password" name="password" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    <span class="toggle-password" onclick="togglePasswordVisibility('password')" style="position: absolute; right: 10px; top: 38px; cursor: pointer;">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeAddAdminDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                    <button type="submit" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">确定</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑管理员对话框 -->
+    <div id="editAdminDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 style="margin-top: 0;">编辑管理员</h3>
+            <form id="editAdminForm">
+                <input type="hidden" id="editAdminId" name="id">
+                <div style="margin-bottom: 15px;">
+                    <label for="editUsername" style="display: block; margin-bottom: 5px;">用户名:</label>
+                    <input type="text" id="editUsername" name="username" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 15px; position: relative;">
+                    <label for="editPassword" style="display: block; margin-bottom: 5px;">密码:</label>
+                    <input type="password" id="editPassword" name="password" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    <span class="toggle-password" onclick="togglePasswordVisibility('editPassword')" style="position: absolute; right: 10px; top: 38px; cursor: pointer;">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeEditAdminDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                    <button type="submit" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 删除确认对话框 -->
+    <div id="deleteConfirmDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 style="margin-top: 0;">确认删除</h3>
+            <p>确定要删除该管理员数据吗？</p>
+            <input type="hidden" id="deleteAdminId">
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeDeleteConfirmDialog()" style="padding: 8px 15px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                <button type="button" onclick="confirmDeleteAdmin()" style="padding: 8px 15px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 打开添加管理员对话框
+        function openAddAdminDialog() {
+            document.getElementById('addAdminDialog').style.display = 'block';
+            document.getElementById('addAdminForm').reset();
+        }
+
+        // 关闭添加管理员对话框
+        function closeAddAdminDialog() {
+            document.getElementById('addAdminDialog').style.display = 'none';
+        }
+
+        // 打开编辑管理员对话框
+        function openEditAdminDialog(adminId) {
+            // 发送 AJAX 请求获取管理员详细信息
+            fetch(`/adminList/get?id=${encodeURIComponent(adminId)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(admin => {
+                    // 填充表单数据
+                    document.getElementById('editAdminId').value = admin.adminId;
+                    document.getElementById('editUsername').value = admin.username;
+                    document.getElementById('editPassword').value = admin.password;
+
+                    // 显示对话框
+                    document.getElementById('editAdminDialog').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('获取管理员信息失败');
+                });
+        }
+
+        // 关闭编辑管理员对话框
+        function closeEditAdminDialog() {
+            document.getElementById('editAdminDialog').style.display = 'none';
+        }
+
+        // 打开删除确认对话框
+        function openDeleteConfirmDialog(adminId) {
+            document.getElementById('deleteAdminId').value = adminId;
+            document.getElementById('deleteConfirmDialog').style.display = 'block';
+        }
+
+        // 关闭删除确认对话框
+        function closeDeleteConfirmDialog() {
+            document.getElementById('deleteConfirmDialog').style.display = 'none';
+        }
+
+        // 确认删除管理员
+        function confirmDeleteAdmin() {
+            const adminId = document.getElementById('deleteAdminId').value;
+            if (!adminId) {
+                alert('无效的管理员ID');
+                return;
+            }
+            // 发送删除请求
+            fetch(`/adminList/delete?id=${encodeURIComponent(adminId)}`, {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('管理员删除成功');
+                        closeDeleteConfirmDialog();
+                        location.reload(); // 刷新页面
+                    } else {
+                        alert('删除失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败');
+                });
+        }
+
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
+        // 页面加载完成后绑定事件
+        document.addEventListener('DOMContentLoaded', function() {
+            const addAdminForm = document.getElementById('addAdminForm');
+            if (addAdminForm) {
+                addAdminForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // 获取表单数据
+                    const formData = new FormData(addAdminForm);
+                    const adminData = {
+                        username: formData.get('username'),
+                        password: formData.get('password')
+                    };
+
+                    // 发送 AJAX 请求
+                    fetch('/adminList/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(adminData)
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('管理员添加成功');
+                                closeAddAdminDialog();
+                                location.reload(); // 刷新页面以显示新数据
+                            } else {
+                                alert('添加失败，请重试');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('添加失败，请重试');
+                        });
+                });
+            }
+
+            const editAdminForm = document.getElementById('editAdminForm');
+            if (editAdminForm) {
+                editAdminForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // 获取表单数据
+                    const formData = new FormData(editAdminForm);
+                    const adminData = {
+                        adminId: formData.get('id'),
+                        username: formData.get('username'),
+                        password: formData.get('password')
+                    };
+
+                    // 发送更新请求
+                    fetch('/adminList/update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(adminData)
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('管理员信息更新成功');
+                                closeEditAdminDialog();
+                                location.reload(); // 刷新页面
+                            } else {
+                                return response.text().then(text => {
+                                    alert('更新失败: ' + text);
+                                    throw new Error(text);
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('更新失败');
+                        });
+                });
+            }
+        });
+    </script>
+
+    <!-- 管理员列表区域 -->
+    <div style="margin-top: 20px; border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background-color: #f8f9fa;">
+            <tr>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">ID</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">用户名</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #eee;">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="admin : ${adminList}">
+                <td style="padding: 12px; border-bottom: 1px solid #eee;" th:text="${admin.adminId}"></td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;" th:text="${admin.username}"></td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                    <a href="javascript:void(0)"
+                       th:data-admin-id="${admin.adminId}"
+                       onclick="openEditAdminDialog(this.getAttribute('data-admin-id'))"
+                       style="color: #3498db; margin-right: 10px;">
+                        <i class="fas fa-edit"></i> 编辑
+                    </a>
+                    <a href="javascript:void(0)"
+                       th:data-admin-id="${admin.adminId}"
+                       onclick="openDeleteConfirmDialog(this.getAttribute('data-admin-id'))"
+                       style="color: #e74c3c;">
+                        <i class="fas fa-trash"></i> 删除
+                    </a>
+                </td>
+            </tr>
+
+            <!-- 当没有管理员数据时显示 -->
+            <tr th:if="${adminList.isEmpty()}">
+                <td colspan="3" style="padding: 20px; text-align: center; color: #777;">
+                    暂无管理员数据
+                </td>
+            </tr>
+        </table>
+    </div>
+</section>
+</body>
+</html>
